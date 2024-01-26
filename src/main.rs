@@ -1,7 +1,7 @@
 use std::{env, thread::sleep, time::Duration};
 use serde_json::Value;
 use reqwest::header::{HeaderMap, USER_AGENT};
-use tokio::{fs, spawn};
+use tokio::{fs, /* spawn */};
 
 static UA: &str = "catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, v0.1.0)";
 
@@ -65,18 +65,23 @@ metadata: {} metadata.txt"
         , file_name, image_id);
 
         let image = reqwest::get(format!("http://nekos.moe/image/{}", &image_id)).await?.bytes().await?;
-        spawn(async {
-            match fs::write(file_name, image).await {
-                Ok(_) => println!("file written successfully"),
+        //spawn(async move /* adding move better not break anything */ {
+        // FIXME: multithreading breaks opening the image, so we're taking this off the shelves
+            match fs::write(&file_name, image).await {
+                Ok(_) => {
+                    println!("file written successfully, now opening in default image viewer");
+                    let result = opener::open(std::path::Path::new(&file_name));
+                    dbg!(result).expect("ok wtf"); // incase of errors it'll be captured here
+                }
                 Err(err) => eprintln!("failed to write file: {}", err),
             }
-        });
+        //});
 
         match fs::write(format!("{} metadata.txt", &image_id), &textified_response).await {
             Ok(_) => println!("successfully written metadata"),
             Err(err) => eprintln!("failed to write metadata: {}", err),
         }
-        
+
     } else {
         panic!("The id value is not a string!");
     }
