@@ -10,7 +10,8 @@ Based off the [nekos.moe](https://nekos.moe) [API](https://docs.nekos.moe).
 
 ~~[ ] showing the images in the terminal, like the kitty terminal.~~
 
+[ ] showing the images in the terminal, like the kitty terminal.
+
 [ ] config files
 
 [ ] make code readable by splitting them into functions
-
