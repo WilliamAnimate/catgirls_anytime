@@ -20,21 +20,27 @@ async fn main() -> Result<(), reqwest::Error> {
             loop {
                 // FIXME: clone
                 // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
-                match scrape(client.clone(), headers.clone()).await {
+                match scrape(client.clone(), headers.clone(), false).await {
                     Ok(_) => {}
                     Err(err) => panic!("an error occured whilst scraping: {}", err),
                 }
                 sleep(Duration::from_secs(20));
             }
         }
+        // FIXME: switch case?
+        if &args[1] == "--save-only" {
+            scrape(client, headers, false).await?;
+
+            return Ok(());
+        }
     }
-    scrape(client, headers).await?;
+    scrape(client, headers, true).await?;
 
     println!("execution complete");
     Ok(())
 }
 
-async fn scrape(client: reqwest::Client, headers: HeaderMap) -> Result<(), reqwest::Error> {
+async fn scrape(client: reqwest::Client, headers: HeaderMap, open_image: bool) -> Result<(), reqwest::Error> {
     // let response = client::get("http://nekos.moe/api/v1/random/image?nsfw=false").await?.text().await?;
     let response = client.get("http://nekos.moe/api/v1/random/image?nsfw=false").headers(headers).send().await?;
     println!("body = {:?}", &response);
@@ -69,9 +75,15 @@ metadata: {} metadata.txt"
         // FIXME: multithreading breaks opening the image, so we're taking this off the shelves
             match fs::write(&file_name, image).await {
                 Ok(_) => {
-                    println!("file written successfully, now opening in default image viewer");
-                    let result = opener::open(std::path::Path::new(&file_name));
-                    dbg!(result).expect("ok wtf"); // incase of errors it'll be captured here
+                    print!("file written successfully");
+
+                    if open_image {
+                        print!(", now opening in default image viewer\n");
+                        let result = opener::open(std::path::Path::new(&file_name));
+                        dbg!(result).expect("ok wtf"); // incase of errors it'll be captured here
+                    } else {
+                        print!("\n");
+                    }
                 }
                 Err(err) => eprintln!("failed to write file: {}", err),
             }
@@ -101,7 +113,7 @@ mod tests {
         headers.insert(reqwest::header::USER_AGENT, crate::UA.parse().unwrap());
 
         // Act
-        let result = crate::scrape(client, headers).await;
+        let result = crate::scrape(client, headers, true).await;
 
         // Assert
         assert!(result.is_ok());
@@ -116,7 +128,7 @@ mod tests {
         headers.insert(reqwest::header::USER_AGENT, crate::UA.parse().unwrap());
 
         // Act
-        let result = crate::scrape(client, headers).await;
+        let result = crate::scrape(client, headers, true).await;
 
         // Assert
         assert!(result.is_ok());
