@@ -1,92 +1,137 @@
 use std::{env, thread::sleep, time::Duration};
 use serde_json::Value;
-use rand::Rng;
-#[cfg(not(wasm))] use std::path::Path;
-#[cfg(not(wasm))] use tokio::{fs, spawn};
+use reqwest::header::{HeaderMap, USER_AGENT};
+use tokio::{fs, /* spawn */};
 
-// webassembly specifics
-#[cfg(wasm)] use wasm_bindgen::prelude::*;
-
-// use reqwest::header; // user agent
-// TODO: implement
-
-#[cfg(wasm)]
-#[wasm_bindgen]
-extern {
-    pub fn alert(s: &str);
-}
-
-static MAX_FILES_CAN_SAVE_TO_DISK: i16 = 32767; // default: 32767 ((2^15)-1). the more, the less chance of a deadlock, and the more files can be at the fs at once.
+static UA: &str = "catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, v0.1.0)";
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
     let args: Vec<String> = env::args().collect();
     dbg!(&args);
+
+    let client = reqwest::Client::new();
+    let mut headers = HeaderMap::new();
+    headers.insert(USER_AGENT, UA.parse().unwrap());
+
     if args.len() > 1 {
         if &args[1] == "scrape" {
             println!("scrape!");
             loop {
-                match scrape().await {
+                // FIXME: clone
+                // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
+                match scrape(client.clone(), headers.clone(), false).await {
                     Ok(_) => {}
                     Err(err) => panic!("an error occured whilst scraping: {}", err),
                 }
                 sleep(Duration::from_secs(20));
             }
         }
+        // FIXME: switch case?
+        if &args[1] == "--save-only" {
+            scrape(client, headers, false).await?;
+
+            return Ok(());
+        }
     }
-    scrape().await?;
+    scrape(client, headers, true).await?;
 
     println!("execution complete");
     Ok(())
 }
 
-// #[tokio::main]
-async fn scrape() -> Result<(), reqwest::Error> {
-    #[cfg(wasm)] {
-        alert("it works!");
-        todo!("port to webassembly");
-        /* ... */
+async fn scrape(client: reqwest::Client, headers: HeaderMap, open_image: bool) -> Result<(), reqwest::Error> {
+    // let response = client::get("http://nekos.moe/api/v1/random/image?nsfw=false").await?.text().await?;
+    let response = client.get("http://nekos.moe/api/v1/random/image?nsfw=false").headers(headers).send().await?;
+    println!("body = {:?}", &response);
 
+    if response.status().as_u16() == 429 {
+        eprintln!("you hit a ratelimit!");
+        return Ok(());
     }
 
-    let response = reqwest::get("http://nekos.moe/api/v1/random/image?nsfw=false").await?.text().await?;
+    // TODO: fix this. for some reason the lsp just kept flagging as error.
+    let textified_response = &response.text().await?;
 
-    println!("body = {}", &response);
+    let parsed_response: Value = serde_json::from_str(&textified_response).unwrap();
 
-    let parsed_response: Value = serde_json::from_str(&response).unwrap();
+    if let Some(image_id) = parsed_response["images"][0]["id"].as_str() {
+        println!("The image id is: {}", &image_id);
 
-    let mut rng = rand::thread_rng(); // i hate this code, but it can improve performance since this is cached
+        let file_name = format!("{}.png", &image_id);
+        if fs::metadata(&file_name).await.is_ok() {
+            println!("the file with id {} exists. not writing file to prevent duplicate", file_name);
+            return Ok(());
+        }
 
-    let mut n = rng.gen_range(0..MAX_FILES_CAN_SAVE_TO_DISK); // mut cause we need to edit it...? bad?
-    let mut file_name = format!("{}.png", n);
-    while Path::new(&file_name).exists() {
-        println!("what");
+        println!("\
+saving file!
+image: {}
+metadata: {} metadata.txt"
+        , file_name, image_id);
 
-        n = rng.gen_range(0..MAX_FILES_CAN_SAVE_TO_DISK);
-        file_name = format!("{}.png", n);
-    }
+        let image = reqwest::get(format!("http://nekos.moe/image/{}", &image_id)).await?.bytes().await?;
+        //spawn(async move /* adding move better not break anything */ {
+        // FIXME: multithreading breaks opening the image, so we're taking this off the shelves
+            match fs::write(&file_name, image).await {
+                Ok(_) => {
+                    print!("file written successfully");
 
-    println!("filename should be {}", file_name);
-
-    if let Some(id) = parsed_response["images"][0]["id"].as_str() {
-        println!("The id value is: {}", id);
-        let final_image = reqwest::get(format!("http://nekos.moe/image/{}", id)).await?.bytes().await?;
-
-        spawn(async {
-            match fs::write(file_name, final_image).await {
-                Ok(_) => println!("file written successfully"),
+                    if open_image {
+                        print!(", now opening in default image viewer\n");
+                        let result = opener::open(std::path::Path::new(&file_name));
+                        dbg!(result).expect("ok wtf"); // incase of errors it'll be captured here
+                    } else {
+                        print!("\n");
+                    }
+                }
                 Err(err) => eprintln!("failed to write file: {}", err),
             }
-        });
+        //});
 
-        match fs::write(format!("{} metadata.txt", n), &response).await {
+        match fs::write(format!("{} metadata.txt", &image_id), &textified_response).await {
             Ok(_) => println!("successfully written metadata"),
             Err(err) => eprintln!("failed to write metadata: {}", err),
         }
+
     } else {
-        // should never get to this point, ever.
         panic!("The id value is not a string!");
     }
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    // tests generated by codium ai
+    // Successfully scrape an image and save it to file
+    #[tokio::test]
+    async fn test_scrape_save_image() {
+        // Arrange
+        let client = reqwest::Client::new();
+        let mut headers = reqwest::header::HeaderMap::new();
+        headers.insert(reqwest::header::USER_AGENT, crate::UA.parse().unwrap());
+
+        // Act
+        let result = crate::scrape(client, headers, true).await;
+
+        // Assert
+        assert!(result.is_ok());
+    }
+
+    // Successfully scrape an image and save its metadata to file
+    #[tokio::test]
+    async fn test_scrape_save_metadata() {
+        // Arrange
+        let client = reqwest::Client::new();
+        let mut headers = reqwest::header::HeaderMap::new();
+        headers.insert(reqwest::header::USER_AGENT, crate::UA.parse().unwrap());
+
+        // Act
+        let result = crate::scrape(client, headers, true).await;
+
+        // Assert
+        assert!(result.is_ok());
+    }
+}
+
