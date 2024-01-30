@@ -43,7 +43,7 @@ async fn main() -> Result<(), reqwest::Error> {
 
                     return Ok(())
                 }
-                _ => println!("unreconized parameter: {}", args),
+                _ => {/* TODO: make this not parse the first argument, which is actually the file path. */},
             }
         }
     }
