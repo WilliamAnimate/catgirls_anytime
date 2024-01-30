@@ -14,27 +14,40 @@ async fn main() -> Result<(), reqwest::Error> {
     let mut headers = HeaderMap::new();
     headers.insert(USER_AGENT, UA.parse().unwrap());
 
+    let mut open_image_on_save: bool = false;
+
+    // clap is bloat
     if args.len() > 1 {
-        if &args[1] == "scrape" {
-            println!("scrape!");
-            loop {
-                // FIXME: clone
-                // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
-                match scrape(client.clone(), headers.clone(), false).await {
-                    Ok(_) => {}
-                    Err(err) => panic!("an error occured whilst scraping: {}", err),
+        for args in args.iter() {
+            match args.as_str() {
+                "scrape" => {
+                    println!("scrape!");
+                    loop {
+                        // FIXME: clone
+                        // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
+                        match scrape(client.clone(), headers.clone(), false).await {
+                            Ok(_) => {}
+                            Err(err) => panic!("an error occured whilst scraping: {}", err),
+                        }
+                        sleep(Duration::from_secs(20));
+                    }
+                },
+                "--save-only" => {
+                    open_image_on_save = true;
+                },
+                "--help" => {
+                    println!("scrape          will likely junk up your 2 TB ssd. Other params are ignored if this is set. (will not open imafe in your default imageviewer)");
+                    println!("--save-only     does not open the image with the system's default image viewer");
+                    println!("--help          displays help and exists");
+                    println!("--force-nsfw    does nothing"); // TODO: do not implement
+
+                    return Ok(())
                 }
-                sleep(Duration::from_secs(20));
+                _ => println!("unreconized parameter: {}", args),
             }
         }
-        // FIXME: switch case?
-        if &args[1] == "--save-only" {
-            scrape(client, headers, false).await?;
-
-            return Ok(());
-        }
     }
-    scrape(client, headers, true).await?;
+    scrape(client, headers, open_image_on_save).await?;
 
     println!("execution complete");
     Ok(())
