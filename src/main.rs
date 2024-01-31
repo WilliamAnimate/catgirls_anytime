@@ -14,14 +14,13 @@ async fn main() -> Result<(), reqwest::Error> {
     let mut headers = HeaderMap::new();
     headers.insert(USER_AGENT, UA.parse().unwrap());
 
-    let mut open_image_on_save: bool = false;
+    let mut open_image_on_save: bool = true;
 
     // clap is bloat
     if args.len() > 1 {
         for args in args.iter() {
             match args.as_str() {
                 "scrape" => {
-                    println!("scrape!");
                     loop {
                         // FIXME: clone
                         // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
@@ -33,7 +32,7 @@ async fn main() -> Result<(), reqwest::Error> {
                     }
                 },
                 "--save-only" => {
-                    open_image_on_save = true;
+                    open_image_on_save = false;
                 },
                 "--help" => {
                     println!("scrape          will likely junk up your 2 TB ssd. Other params are ignored if this is set. (will not open imafe in your default imageviewer)");
