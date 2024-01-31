@@ -3,7 +3,7 @@ use serde_json::Value;
 use reqwest::header::{HeaderMap, USER_AGENT};
 use tokio::{fs, /* spawn */};
 
-static UA: &str = "catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, v0.1.0)";
+static UA: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
@@ -56,14 +56,12 @@ async fn main() -> Result<(), reqwest::Error> {
 async fn scrape(client: reqwest::Client, headers: HeaderMap, open_image: bool) -> Result<(), reqwest::Error> {
     // let response = client::get("http://nekos.moe/api/v1/random/image?nsfw=false").await?.text().await?;
     let response = client.get("http://nekos.moe/api/v1/random/image?nsfw=false").headers(headers).send().await?;
-    println!("body = {:?}", &response);
 
     if response.status().as_u16() == 429 {
         eprintln!("you hit a ratelimit!");
         return Ok(());
     }
 
-    // TODO: fix this. for some reason the lsp just kept flagging as error.
     let textified_response = &response.text().await?;
 
     let parsed_response: Value = serde_json::from_str(&textified_response).unwrap();
