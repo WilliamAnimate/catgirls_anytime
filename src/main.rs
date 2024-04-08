@@ -22,8 +22,7 @@ async fn main() -> Result<(), reqwest::Error> {
             "scrape" => {
                 loop {
                     // FIXME: clone
-                    // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
-                    match scrape(client.clone(), headers.clone(), false).await {
+                    match scrape(&client, headers.clone(), false).await {
                         Ok(()) => (),
                         Err(err) => panic!("an error occured whilst scraping: {err}"),
                     }
@@ -44,13 +43,13 @@ async fn main() -> Result<(), reqwest::Error> {
             _ => {/* TODO: make this not parse the first argument, which is actually the file path. */},
         }
     }
-    scrape(client.clone(), headers.clone(), open_image_on_save).await?;
+    scrape(&client, headers, open_image_on_save).await?;
 
     println!("execution complete");
     Ok(())
 }
 
-async fn scrape(client: reqwest::Client, headers: HeaderMap, open_image: bool) -> Result<(), reqwest::Error> {
+async fn scrape(client: &reqwest::Client, headers: HeaderMap, open_image: bool) -> Result<(), reqwest::Error> {
     // let response = client::get("http://nekos.moe/api/v1/random/image?nsfw=false").await?.text().await?;
     let response = client.get("http://nekos.moe/api/v1/random/image?nsfw=false").headers(headers).send().await?;
 
