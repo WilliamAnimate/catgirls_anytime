@@ -18,15 +18,15 @@ async fn main() -> Result<(), reqwest::Error> {
 
     // clap is bloat
     if args.len() > 1 {
-        for args in args.iter() {
+        for args in &args {
             match args.as_str() {
                 "scrape" => {
                     loop {
                         // FIXME: clone
                         // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
                         match scrape(client.clone(), headers.clone(), false).await {
-                            Ok(_) => {}
-                            Err(err) => panic!("an error occured whilst scraping: {}", err),
+                            Ok(()) => (),
+                            Err(err) => panic!("an error occured whilst scraping: {err}"),
                         }
                         sleep(Duration::from_secs(20));
                     }
@@ -63,45 +63,44 @@ async fn scrape(client: reqwest::Client, headers: HeaderMap, open_image: bool) -
 
     let textified_response = &response.text().await?;
 
-    let parsed_response: Value = serde_json::from_str(&textified_response).unwrap();
+    let parsed_response: Value = serde_json::from_str(textified_response).unwrap();
 
     if let Some(image_id) = parsed_response["images"][0]["id"].as_str() {
         println!("The image id is: {}", &image_id);
 
         let file_name = format!("{}.png", &image_id);
         if fs::metadata(&file_name).await.is_ok() {
-            println!("the file with id {} exists. not writing file to prevent duplicate", file_name);
+            println!("the file with id {file_name} exists. not writing file to prevent duplicate");
             return Ok(());
         }
 
         println!("\
 saving file!
-image: {}
-metadata: {} metadata.txt"
-        , file_name, image_id);
+image: {file_name}
+metadata: {image_id} metadata.txt");
 
         let image = reqwest::get(format!("http://nekos.moe/image/{}", &image_id)).await?.bytes().await?;
         //spawn(async move /* adding move better not break anything */ {
         // FIXME: multithreading breaks opening the image, so we're taking this off the shelves
             match fs::write(&file_name, image).await {
-                Ok(_) => {
+                Ok(()) => {
                     print!("file written successfully");
 
                     if open_image {
-                        print!(", now opening in default image viewer\n");
+                        println!(", now opening in default image viewer");
                         let result = opener::open(std::path::Path::new(&file_name));
                         dbg!(result).expect("ok wtf"); // incase of errors it'll be captured here
                     } else {
-                        print!("\n");
+                        println!();
                     }
                 }
-                Err(err) => eprintln!("failed to write file: {}", err),
+                Err(err) => eprintln!("failed to write file: {err}"),
             }
         //});
 
         match fs::write(format!("{} metadata.txt", &image_id), &textified_response).await {
-            Ok(_) => println!("successfully written metadata"),
-            Err(err) => eprintln!("failed to write metadata: {}", err),
+            Ok(()) => println!("successfully written metadata"),
+            Err(err) => eprintln!("failed to write metadata: {err}"),
         }
 
     } else {
