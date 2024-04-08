@@ -21,8 +21,7 @@ async fn main() -> Result<(), reqwest::Error> {
         match args.as_str() {
             "scrape" => {
                 loop {
-                    // FIXME: clone
-                    match scrape(&client, headers.clone(), false).await {
+                    match scrape(&client, &mut headers, false).await {
                         Ok(()) => (),
                         Err(err) => panic!("an error occured whilst scraping: {err}"),
                     }
@@ -43,15 +42,15 @@ async fn main() -> Result<(), reqwest::Error> {
             _ => {/* TODO: make this not parse the first argument, which is actually the file path. */},
         }
     }
-    scrape(&client, headers, open_image_on_save).await?;
+
+    scrape(&client, &mut headers, open_image_on_save).await?;
 
     println!("execution complete");
     Ok(())
 }
 
-async fn scrape(client: &reqwest::Client, headers: HeaderMap, open_image: bool) -> Result<(), reqwest::Error> {
-    // let response = client::get("http://nekos.moe/api/v1/random/image?nsfw=false").await?.text().await?;
-    let response = client.get("http://nekos.moe/api/v1/random/image?nsfw=false").headers(headers).send().await?;
+async fn scrape(client: &reqwest::Client, headers: &mut HeaderMap, open_image: bool) -> Result<(), reqwest::Error> {
+    let response = client.get("http://nekos.moe/api/v1/random/image?nsfw=false").headers(core::mem::take(headers)).send().await?;
 
     if response.status().as_u16() == 429 {
         eprintln!("you hit a ratelimit!");
