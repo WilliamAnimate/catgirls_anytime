@@ -17,36 +17,34 @@ async fn main() -> Result<(), reqwest::Error> {
     let mut open_image_on_save: bool = true;
 
     // clap is bloat
-    if args.len() > 1 {
-        for args in &args {
-            match args.as_str() {
-                "scrape" => {
-                    loop {
-                        // FIXME: clone
-                        // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
-                        match scrape(client.clone(), headers.clone(), false).await {
-                            Ok(()) => (),
-                            Err(err) => panic!("an error occured whilst scraping: {err}"),
-                        }
-                        sleep(Duration::from_secs(20));
+    for args in &args {
+        match args.as_str() {
+            "scrape" => {
+                loop {
+                    // FIXME: clone
+                    // this code runs in a loop, expect your carbon emissions to triple if running in scrape mode
+                    match scrape(client.clone(), headers.clone(), false).await {
+                        Ok(()) => (),
+                        Err(err) => panic!("an error occured whilst scraping: {err}"),
                     }
-                },
-                "--save-only" => {
-                    open_image_on_save = false;
-                },
-                "--help" => {
-                    println!("scrape          will likely junk up your 2 TB ssd. Other params are ignored if this is set. (will not open image in your default imageviewer)");
-                    println!("--save-only     does not open the image with the system's default image viewer");
-                    println!("--help          displays help and exists");
-                    println!("--force-nsfw    does nothing"); // TODO: do not implement
-
-                    return Ok(())
+                    sleep(Duration::from_secs(20));
                 }
-                _ => {/* TODO: make this not parse the first argument, which is actually the file path. */},
+            },
+            "--save-only" => {
+                open_image_on_save = false;
+            },
+            "--help" => {
+                println!("scrape          will likely junk up your 2 TB ssd. Other params are ignored if this is set. (will not open image in your default imageviewer)");
+                println!("--save-only     does not open the image with the system's default image viewer");
+                println!("--help          displays help and exists");
+                println!("--force-nsfw    does nothing"); // TODO: do not implement
+
+                return Ok(())
             }
+            _ => {/* TODO: make this not parse the first argument, which is actually the file path. */},
         }
     }
-    scrape(client, headers, open_image_on_save).await?;
+    scrape(client.clone(), headers.clone(), open_image_on_save).await?;
 
     println!("execution complete");
     Ok(())
