@@ -22,6 +22,5 @@ The image seen above is a transparent version of [https://nekos.moe/post/Gu8dj-_
 
 ## Legal
 
-I literally don't want to be associated with this shitshow (lmao). This is why I am licensing `catgirls_anytime` under the license whose name is literally "DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE".
+do whatever. this is licensed under the **DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE**
 
-This means you are allowed to do **ANYTHING** with this project, and you don't even need to give me attribution.
