@@ -36,7 +36,7 @@ async fn main() -> Result<(), reqwest::Error> {
                 parsed_args.open_image_on_save = false;
             },
             "--help" => {
-                println!("scrape          will likely junk up your 2 TB ssd. Other params are ignored if this is set. (will not open image in your default imageviewer)");
+                println!("scrape          will likely junk up your 2 TB ssd. This will ignore the --save-only flag.");
                 println!("--save-only     does not open the image with the system's default image viewer");
                 println!("--help          displays help and exists");
                 println!("--force-nsfw    feeding the weebs");
