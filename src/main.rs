@@ -46,10 +46,7 @@ async fn main() -> Result<(), reqwest::Error> {
                 return Ok(())
             }
             "--force-nsfw" => {
-                // opener::open_browser("https://youtu.be/ztVMib1T4T4").unwrap(); // fuck you
-                // loop{}
                 parsed_args.allow_nsfw = true;
-                // print!("oh no...");
                 println!("caution: nsfw is on!");
             }
             _ => ()
@@ -71,7 +68,6 @@ async fn main() -> Result<(), reqwest::Error> {
 }
 
 async fn scrape(args: &Args) -> Result<(), reqwest::Error> {
-    // let mut url = String::new();
     let base_url = "http://nekos.moe/api/v1/random/image?nsfw=";
     let processed: String;
 
@@ -87,8 +83,6 @@ async fn scrape(args: &Args) -> Result<(), reqwest::Error> {
         return Ok(());
     }
     let textified_response = &response.text().await?;
-
-    // print!(" debug: {}", &textified_response);
 
     let parsed_response: Value = serde_json::from_str(textified_response).unwrap();
 
