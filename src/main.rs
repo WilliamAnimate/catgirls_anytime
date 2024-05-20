@@ -77,7 +77,10 @@ async fn scrape(args: &Args) -> Result<(), reqwest::Error> {
         processed = format!("{}{}", base_url, "false");
     };
 
-    let response = args.client.get(processed).headers(args.headers.clone(/* FIXME: holy shit */)).send().await?;
+    let mut head: HeaderMap = Default::default();
+    head.clone_from(&args.headers); // not the same as .clone(); this reuses the allocation (which
+                                    // is faster)
+    let response = args.client.get(processed).headers(head).send().await?;
     if response.status().as_u16() == 429 {
         eprintln!("you hit a ratelimit!");
         return Ok(());
