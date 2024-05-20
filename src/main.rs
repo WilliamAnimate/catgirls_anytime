@@ -105,7 +105,7 @@ metadata: {image_id} metadata.txt");
             Ok(()) => {
                 print!("file written successfully");
 
-                if args.open_image_on_save {
+                if args.open_image_on_save && !args.scrape {
                     println!(", now opening in default image viewer");
                     let result = opener::open(std::path::Path::new(&file_name));
                     dbg!(result).expect("ok wtf"); // incase of errors it'll be captured here
