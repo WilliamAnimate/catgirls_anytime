@@ -10,3 +10,10 @@ opener = "0.6.1"
 reqwest = "0.11.23"
 serde_json = "1.0.111"
 tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread", "fs"] }
+
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
