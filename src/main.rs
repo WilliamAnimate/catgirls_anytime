@@ -39,9 +39,13 @@ async fn main() -> Result<(), reqwest::Error> {
                 println!("scrape          will likely junk up your 2 TB ssd. Other params are ignored if this is set. (will not open image in your default imageviewer)");
                 println!("--save-only     does not open the image with the system's default image viewer");
                 println!("--help          displays help and exists");
-                println!("--force-nsfw    does nothing"); // TODO: do not implement
+                println!("--force-nsfw    feeding the weebs");
 
                 return Ok(())
+            }
+            "--force-nsfw" => {
+                opener::open_browser("https://youtu.be/ztVMib1T4T4").unwrap(); // fuck you
+                loop{}
             }
             _ => ()
         }
