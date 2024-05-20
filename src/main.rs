@@ -13,6 +13,7 @@ struct Args {
 }
 
 static UA: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
+static BASE_URL: &str = "http://nekos.moe/api/v1/random/image?nsfw=";
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
@@ -68,13 +69,9 @@ async fn main() -> Result<(), reqwest::Error> {
 }
 
 async fn scrape(args: &Args) -> Result<(), reqwest::Error> {
-    let base_url = "http://nekos.moe/api/v1/random/image?nsfw=";
-    let processed: String;
-
-    if args.allow_nsfw {
-        processed = format!("{}{}", base_url, "true");
-    } else {
-        processed = format!("{}{}", base_url, "false");
+    let processed = match args.allow_nsfw {
+        true => format!("{}{}", BASE_URL, "true"),
+        false => format!("{}{}", BASE_URL, "false"),
     };
 
     let mut head: HeaderMap = Default::default();
