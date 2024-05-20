@@ -9,6 +9,7 @@ struct Args {
 
     open_image_on_save: bool,
     scrape: bool,
+    allow_nsfw: bool,
 }
 
 static UA: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
@@ -24,6 +25,7 @@ async fn main() -> Result<(), reqwest::Error> {
 
         open_image_on_save: true,
         scrape: false,
+        allow_nsfw: false,
     };
     parsed_args.headers.insert(USER_AGENT, UA.parse().unwrap());
 
@@ -44,8 +46,11 @@ async fn main() -> Result<(), reqwest::Error> {
                 return Ok(())
             }
             "--force-nsfw" => {
-                opener::open_browser("https://youtu.be/ztVMib1T4T4").unwrap(); // fuck you
-                loop{}
+                // opener::open_browser("https://youtu.be/ztVMib1T4T4").unwrap(); // fuck you
+                // loop{}
+                parsed_args.allow_nsfw = true;
+                // print!("oh no...");
+                println!("caution: nsfw is on!");
             }
             _ => ()
         }
@@ -66,14 +71,24 @@ async fn main() -> Result<(), reqwest::Error> {
 }
 
 async fn scrape(args: &Args) -> Result<(), reqwest::Error> {
-    let response = args.client.get("http://nekos.moe/api/v1/random/image?nsfw=false").headers(args.headers.clone(/* FIXME: holy shit */)).send().await?;
+    // let mut url = String::new();
+    let base_url = "http://nekos.moe/api/v1/random/image?nsfw=";
+    let processed: String;
 
+    if args.allow_nsfw {
+        processed = format!("{}{}", base_url, "true");
+    } else {
+        processed = format!("{}{}", base_url, "false");
+    };
+
+    let response = args.client.get(processed).headers(args.headers.clone(/* FIXME: holy shit */)).send().await?;
     if response.status().as_u16() == 429 {
         eprintln!("you hit a ratelimit!");
         return Ok(());
     }
-
     let textified_response = &response.text().await?;
+
+    // print!(" debug: {}", &textified_response);
 
     let parsed_response: Value = serde_json::from_str(textified_response).unwrap();
 
@@ -117,4 +132,3 @@ metadata: {image_id} metadata.txt");
 
     Ok(())
 }
-
