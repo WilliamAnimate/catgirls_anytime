@@ -18,7 +18,6 @@ static BASE_URL: &str = "http://nekos.moe/api/v1/random/image?nsfw=";
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
     let args: Vec<String> = env::args().collect();
-    dbg!(&args);
 
     let mut parsed_args = Args {
         client: reqwest::Client::new(),
