@@ -68,6 +68,41 @@ async fn main() -> Result<(), reqwest::Error> {
     Ok(())
 }
 
+async fn save_image_and_metadata(
+    image_id: &str,
+    file_name: &str,
+    textified_response: &str,
+    open_image_on_save: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    if fs::metadata(file_name).await.is_ok() {
+        println!("The file with id {file_name} exists. Not writing file to prevent duplicates.");
+        return Ok(());
+    }
+
+    println!("Saving file!\nimage: {file_name}\nmetadata: {image_id} metadata.txt");
+
+    let image = reqwest::get(format!("http://nekos.moe/image/{}", image_id)).await?.bytes().await?;
+
+    if let Err(e) = fs::write(file_name, image).await {
+        eprintln!("Failed to write file: {:?}", e);
+        return Err(Box::new(e));
+    }
+
+    if open_image_on_save {
+        println!(", Now opening in default image viewer.");
+        opener::open(std::path::Path::new(file_name))?;
+    }
+
+    if let Err(e) = fs::write(format!("{}_metadata.txt", image_id), textified_response).await {
+        eprintln!("Failed to write metadata: {:?}", e);
+        return Err(Box::new(e));
+    }
+
+    println!("Successfully written metadata.");
+
+    Ok(())
+}
+
 async fn scrape(args: &Args) -> Result<(), reqwest::Error> {
     let processed = match args.allow_nsfw {
         true => format!("{}{}", BASE_URL, "true"),
@@ -87,39 +122,9 @@ async fn scrape(args: &Args) -> Result<(), reqwest::Error> {
     let parsed_response: Value = serde_json::from_str(textified_response).unwrap();
 
     if let Some(image_id) = parsed_response["images"][0]["id"].as_str() {
-        println!("The image id is: {}", &image_id);
-
-        let file_name = format!("{}.png", &image_id);
-        if fs::metadata(&file_name).await.is_ok() {
-            println!("the file with id {file_name} exists. not writing file to prevent duplicate");
-            return Ok(());
-        }
-
-        println!("\
-saving file!
-image: {file_name}
-metadata: {image_id} metadata.txt");
-
-        let image = reqwest::get(format!("http://nekos.moe/image/{}", &image_id)).await?.bytes().await?;
-        match fs::write(&file_name, image).await {
-            Ok(()) => {
-                print!("file written successfully");
-
-                if args.open_image_on_save && !args.scrape {
-                    println!(", now opening in default image viewer");
-                    let result = opener::open(std::path::Path::new(&file_name));
-                    dbg!(result).expect("ok wtf"); // incase of errors it'll be captured here
-                } else {
-                    println!();
-                }
-            }
-            Err(err) => eprintln!("failed to write file: {err}"),
-        }
-
-        match fs::write(format!("{} metadata.txt", &image_id), &textified_response).await {
-            Ok(()) => println!("successfully written metadata"),
-            Err(err) => eprintln!("failed to write metadata: {err}"),
-        }
+        let file_name = format!("{image_id}.png");
+        let open_image_on_save = if args.scrape {false} else {args.open_image_on_save};
+        save_image_and_metadata(&image_id, &file_name, &textified_response, open_image_on_save).await.unwrap();
     } else {
         panic!("The id value is not a string!");
     }
