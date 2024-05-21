@@ -15,7 +15,7 @@ struct Args {
 static UA: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
 static BASE_URL: &str = "http://nekos.moe/api/v1/random/image?nsfw=";
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), reqwest::Error> {
     let args: Vec<String> = env::args().collect();
 
@@ -62,8 +62,6 @@ async fn main() -> Result<(), reqwest::Error> {
     }
 
     scrape(&parsed_args).await?;
-
-    println!("execution complete");
     Ok(())
 }
 
