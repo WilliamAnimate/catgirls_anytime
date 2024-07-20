@@ -5,6 +5,7 @@ struct Args {
     open_image_on_save: bool,
     scrape: bool,
     allow_nsfw: bool,
+    exit_after_args: bool,
 }
 
 struct Request {
@@ -18,13 +19,14 @@ struct Request {
 static UA: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
 static BASE_URL: &str = "http://nekos.moe/api/v1/random/image?nsfw=";
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn parse_args() -> Args {
     let args: Vec<String> = env::args().collect();
 
     let mut parsed_args = Args {
         open_image_on_save: true,
         scrape: false,
         allow_nsfw: false,
+        exit_after_args: false,
     };
 
     for args in &args {
@@ -41,7 +43,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("--help          displays help and exists");
                 println!("--force-nsfw    feeding the weebs");
 
-                return Ok(())
+                parsed_args.exit_after_args = true;
+                break;
             }
             "--force-nsfw" => {
                 parsed_args.allow_nsfw = true;
@@ -50,6 +53,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             _ => ()
         }
     }
+
+    parsed_args
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let parsed_args = parse_args();
 
     let agent = ureq::builder()
         .user_agent(UA)
