@@ -7,6 +7,14 @@ struct Args {
     allow_nsfw: bool,
 }
 
+struct Request {
+    image_id: String,
+    file_name: String,
+    response: String,
+
+    open_image_on_save: bool,
+}
+
 static UA: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
 static BASE_URL: &str = "http://nekos.moe/api/v1/random/image?nsfw=";
 
@@ -49,51 +57,53 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if parsed_args.scrape {
         loop {
-            if let Err(err) = get_image_id(&parsed_args, &agent) {
-                panic!("an error occured whilst scraping: {err}");
-            }
+            get_and_download(&parsed_args, &agent).unwrap();
             sleep(Duration::from_secs(20));
         }
     }
 
-    get_image_id(&parsed_args, &agent)?;
+    get_and_download(&parsed_args, &agent).unwrap();
 
     Ok(())
 }
 
+fn get_and_download(parsed_args: &Args, agent: &ureq::Agent) -> Result<(), Box<dyn std::error::Error>> {
+    match get_image_id(&parsed_args, &agent) {
+        Ok(ob) => save_image_and_metadata(ob, &agent),
+        Err(err) => Err(err),
+    }
+}
+
 fn save_image_and_metadata(
-    image_id: &str,
-    file_name: &str,
-    textified_response: &str,
-    open_image_on_save: bool,
+    request: Request,
     agent: &ureq::Agent
 ) -> Result<(), Box<dyn std::error::Error>> {
     use std::fs;
     use std::io::Read;
 
-    if fs::metadata(file_name).is_ok() {
-        println!("The file with id {file_name} exists. Not writing file to prevent duplicates.");
+    if fs::metadata(&request.file_name).is_ok() {
+        println!("The file with id {} exists. Not writing file to prevent duplicates.", request.file_name);
         return Ok(());
     }
 
-    println!("Saving file!\nimage: {file_name}\nmetadata: {image_id} metadata.txt");
+    println!("Saving file!\nimage: {}\nmetadata: {} metadata.txt", &request.file_name, &request.image_id);
 
-    let resp = agent.get(&format!("http://nekos.moe/image/{}", image_id))
+    let resp = agent.get(&format!("http://nekos.moe/image/{}", request.image_id))
         .call()?;
     let mut bytes: Vec<u8> = Vec::new();
     resp.into_reader().read_to_end(&mut bytes)?;
 
-    if let Err(e) = fs::write(file_name, bytes) {
+    if let Err(e) = fs::write(&request.file_name, bytes) {
         eprintln!("Failed to write file: {:?}", e);
         return Err(Box::new(e));
     }
 
-    if open_image_on_save {
+    if request.open_image_on_save {
         println!("Opening in default image viewer.");
-        opener::open(std::path::Path::new(file_name))?;
+        opener::open(std::path::Path::new(&request.file_name))?;
     }
 
-    if let Err(e) = fs::write(format!("{}_metadata.txt", image_id), textified_response) {
+    if let Err(e) = fs::write(format!("{}_metadata.txt", &request.image_id), &request.response) {
         eprintln!("Failed to write metadata: {:?}", e);
         return Err(Box::new(e));
     }
@@ -103,7 +113,7 @@ fn save_image_and_metadata(
     Ok(())
 }
 
-fn get_image_id(args: &Args, agent: &ureq::Agent) -> Result<(), Box<dyn std::error::Error>> {
+fn get_image_id<'a>(args: &'a Args, agent: &'a ureq::Agent) -> Result<Request, Box<dyn std::error::Error>> {
     let processed = match args.allow_nsfw {
         true => format!("{}{}", BASE_URL, "true"),
         false => format!("{}{}", BASE_URL, "false"),
@@ -115,13 +125,21 @@ fn get_image_id(args: &Args, agent: &ureq::Agent) -> Result<(), Box<dyn std::err
 
     let parsed_response: Value = serde_json::from_str(&body).unwrap();
 
-    if let Some(image_id) = parsed_response["images"][0]["id"].as_str() {
-        let file_name = format!("{image_id}.png");
-        let open_image_on_save = if args.scrape {false} else {args.open_image_on_save};
-        save_image_and_metadata(&image_id, &file_name, &body, open_image_on_save, agent).unwrap();
-    } else {
-        panic!("The id value is not a string!");
-    }
+    match parsed_response["images"][0]["id"].as_str() {
+        Some(image_id) => {
+            let file_name = format!("{image_id}.png");
+            let open_image_on_save = if args.scrape {false} else {args.open_image_on_save};
 
-    Ok(())
+            return Ok(
+                Request {
+                    image_id: image_id.to_string(),
+                    file_name,
+                    response: body,
+                    open_image_on_save
+                }
+            )
+        },
+        None => panic!("The id value is not a string!"),
+    }
 }
+
