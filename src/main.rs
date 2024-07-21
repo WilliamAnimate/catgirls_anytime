@@ -113,7 +113,7 @@ fn save_image_and_metadata(
     resp?.into_reader().read_to_end(&mut bytes)?;
 
     if let Err(e) = fs::write(&request.file_name, bytes) {
-        eprintln!("Failed to write file: {:?}", e);
+        eprintln!("Failed to write file: {e:?}");
         return Err(Box::new(e));
     }
 
@@ -123,7 +123,7 @@ fn save_image_and_metadata(
     }
 
     if let Err(e) = fs::write(format!("{}_metadata.txt", &request.image_id), &request.response) {
-        eprintln!("Failed to write metadata: {:?}", e);
+        eprintln!("Failed to write metadata: {e:?}");
         return Err(Box::new(e));
     }
 
@@ -153,7 +153,7 @@ fn get_image_id<'a>(args: &'a Args, agent: &'a ureq::Agent) -> Result<Request, B
             let file_name = format!("{image_id}.png");
             let open_image_on_save = if args.scrape {false} else {args.open_image_on_save};
 
-            return Ok(
+            Ok(
                 Request {
                     image_id: image_id.to_string(),
                     file_name,
