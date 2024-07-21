@@ -18,7 +18,8 @@ struct Request {
 }
 
 static UA: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
-static BASE_URL: &str = "http://nekos.moe/api/v1/random/image?nsfw=";
+static REQUEST_URL: &str = "http://nekos.moe/api/v1/random/image?nsfw=";
+static IMAGE_URL: &str = "http://nekos.moe/image/";
 
 fn parse_args() -> Args {
     let args: Vec<String> = env::args().collect();
@@ -102,7 +103,7 @@ fn save_image_and_metadata(
 
     println!("Saving file!\nimage: {}\nmetadata: {} metadata.txt", &request.file_name, &request.image_id);
 
-    let resp = agent.get(&format!("http://nekos.moe/image/{}", request.image_id)).call();
+    let resp = agent.get(&format!("{}{}", IMAGE_URL, request.image_id)).call();
     if let Err(Error::Status(code, _response)) = &resp {
         let e = format!("Server responded with {code}");
         eprintln!("{}", &e);
@@ -133,8 +134,8 @@ fn save_image_and_metadata(
 
 fn get_image_id<'a>(args: &'a Args, agent: &'a ureq::Agent) -> Result<Request, Box<dyn std::error::Error>> {
     let processed = match args.allow_nsfw {
-        true => format!("{}{}", BASE_URL, "true"),
-        false => format!("{}{}", BASE_URL, "false"),
+        true => format!("{}{}", REQUEST_URL, "true"),
+        false => format!("{}{}", REQUEST_URL, "false"),
     };
 
     let body = agent.get(&processed).call();
