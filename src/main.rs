@@ -30,16 +30,16 @@ fn parse_args() -> Args {
         exit_after_args: false,
     };
 
-    for args in &args {
+    for args in &args[1..] {
         match args.as_str() {
-            "scrape" => {
+            "--scrape" => {
                 parsed_args.scrape = true;
             },
             "--save-only" => {
                 parsed_args.open_image_on_save = false;
             },
             "--help" => {
-                println!("scrape          will likely junk up your 2 TB ssd. This will ignore the --save-only flag.");
+                println!("--scrape          will likely junk up your 2 TB ssd. This will ignore the --save-only flag.");
                 println!("--save-only     does not open the image with the system's default image viewer");
                 println!("--help          displays help and exists");
                 println!("--force-nsfw    feeding the weebs");
@@ -51,7 +51,7 @@ fn parse_args() -> Args {
                 parsed_args.allow_nsfw = true;
                 println!("caution: nsfw is on!");
             }
-            _ => ()
+            other => println!("Unknown argument: {other}"),
         }
     }
 
