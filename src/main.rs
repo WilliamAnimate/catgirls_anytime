@@ -83,8 +83,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn get_and_download(parsed_args: &Args, agent: &ureq::Agent) -> Result<(), Box<dyn std::error::Error>> {
-    match get_image_id(&parsed_args, &agent) {
-        Ok(ob) => save_image_and_metadata(ob, &agent),
+    match get_image_id(parsed_args, agent) {
+        Ok(ob) => save_image_and_metadata(ob, agent),
         Err(err) => Err(err),
     }
 }
