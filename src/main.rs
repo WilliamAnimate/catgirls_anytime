@@ -1,5 +1,6 @@
 use std::{env, thread::sleep, time::Duration};
 use serde_json::Value;
+use ureq::Error;
 
 struct Args {
     open_image_on_save: bool,
@@ -66,12 +67,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if parsed_args.scrape {
         loop {
-            get_and_download(&parsed_args, &agent).unwrap();
+            if let Err(err) = get_and_download(&parsed_args, &agent) {
+                eprintln!("Failed: {err}");
+            }
             sleep(Duration::from_secs(20));
         }
     }
 
-    get_and_download(&parsed_args, &agent).unwrap();
+    if let Err(err) = get_and_download(&parsed_args, &agent) {
+        eprintln!("Failed: {err}");
+    }
 
     Ok(())
 }
@@ -97,10 +102,14 @@ fn save_image_and_metadata(
 
     println!("Saving file!\nimage: {}\nmetadata: {} metadata.txt", &request.file_name, &request.image_id);
 
-    let resp = agent.get(&format!("http://nekos.moe/image/{}", request.image_id))
-        .call()?;
+    let resp = agent.get(&format!("http://nekos.moe/image/{}", request.image_id)).call();
+    if let Err(Error::Status(code, _response)) = &resp {
+        let e = format!("Server responded with {code}");
+        eprintln!("{}", &e);
+        return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, e)));
+    }
     let mut bytes: Vec<u8> = Vec::new();
-    resp.into_reader().read_to_end(&mut bytes)?;
+    resp?.into_reader().read_to_end(&mut bytes)?;
 
     if let Err(e) = fs::write(&request.file_name, bytes) {
         eprintln!("Failed to write file: {:?}", e);
@@ -128,9 +137,13 @@ fn get_image_id<'a>(args: &'a Args, agent: &'a ureq::Agent) -> Result<Request, B
         false => format!("{}{}", BASE_URL, "false"),
     };
 
-    let body: String = agent.get(&processed)
-        .call()?
-        .into_string()?;
+    let body = agent.get(&processed).call();
+    if let Err(Error::Status(code, _response)) = &body {
+        let e = format!("Server responded with {code}");
+        eprintln!("{}", &e);
+        return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, e)));
+    }
+    let body = body?.into_string()?;
 
     let parsed_response: Value = serde_json::from_str(&body).unwrap();
 
