@@ -6,6 +6,7 @@ struct Args {
     open_image_on_save: bool,
     scrape: bool,
     allow_nsfw: bool,
+    force_nsfw: bool,
     exit_after_args: bool,
 }
 
@@ -18,7 +19,8 @@ struct Request {
 }
 
 static UA: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
-static REQUEST_URL: &str = "http://nekos.moe/api/v1/random/image?nsfw=";
+static REQUEST_URL: &str = "http://nekos.moe/api/v1/random/image";
+static REQUEST_PARAM_NSFW: &str = "?nsfw=";
 static IMAGE_URL: &str = "http://nekos.moe/image/";
 
 fn parse_args() -> Args {
@@ -28,6 +30,7 @@ fn parse_args() -> Args {
         open_image_on_save: true,
         scrape: false,
         allow_nsfw: false,
+        force_nsfw: false,
         exit_after_args: false,
     };
 
@@ -40,20 +43,35 @@ fn parse_args() -> Args {
                 parsed_args.open_image_on_save = false;
             },
             "--help" => {
-                println!("--scrape          will likely junk up your 2 TB ssd. This will ignore the --save-only flag.");
+                println!("--scrape        will likely junk up your 2 TB ssd. This will ignore the --save-only flag.");
                 println!("--save-only     does not open the image with the system's default image viewer");
+                println!("--allow-nsfw    allows the api to return an nsfw image");
+                println!("--force-nsfw    requests the api to return an nsfw image");
                 println!("--help          displays help and exists");
-                println!("--force-nsfw    feeding the weebs");
 
                 parsed_args.exit_after_args = true;
                 break;
             }
-            "--force-nsfw" => {
+            "--allow-nsfw" => {
+                if parsed_args.force_nsfw {
+                    println!("Error: --force-nsfw flag passed alongside --allow-nsfw.");
+                    std::process::exit(1);
+                }
                 parsed_args.allow_nsfw = true;
-                println!("caution: nsfw is on!");
+            }
+            "--force-nsfw" => {
+                if parsed_args.allow_nsfw {
+                    println!("Error: --allow-nsfw flag passed alongside --force-nsfw.");
+                    std::process::exit(1);
+                }
+                parsed_args.force_nsfw = true;
             }
             other => println!("Unknown argument: {other}"),
         }
+    }
+
+    if parsed_args.allow_nsfw || parsed_args.force_nsfw {
+        println!("Caution: nsfw is on!");
     }
 
     parsed_args
@@ -61,6 +79,10 @@ fn parse_args() -> Args {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let parsed_args = parse_args();
+
+    if parsed_args.exit_after_args {
+        return Ok(())
+    }
 
     let agent = ureq::builder()
         .user_agent(UA)
@@ -133,10 +155,15 @@ fn save_image_and_metadata(
 }
 
 fn get_image_id<'a>(args: &'a Args, agent: &'a ureq::Agent) -> Result<Request, Box<dyn std::error::Error>> {
-    let processed = match args.allow_nsfw {
-        true => format!("{}{}", REQUEST_URL, "true"),
-        false => format!("{}{}", REQUEST_URL, "false"),
-    };
+    // this is awful
+    let processed: String;
+    if args.force_nsfw {
+        processed = format!("{}{}{}", REQUEST_URL, REQUEST_PARAM_NSFW, "true");
+    } else if args.allow_nsfw {
+        processed = REQUEST_URL.to_string();
+    } else {
+        processed = format!("{}{}{}", REQUEST_URL, REQUEST_PARAM_NSFW, "false");
+    }
 
     let body = agent.get(&processed).call();
     if let Err(Error::Status(code, _response)) = &body {
