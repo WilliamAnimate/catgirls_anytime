@@ -41,10 +41,10 @@ fn pick_and_download(parsed_args: &Args, agent: &Net) -> Result<(), Box<dyn std:
     let mut rng = thread_rng();
     match rng.gen_range(0..2) {
         0 => match dotmoe::get_image_id(parsed_args, agent) {
-            Ok(ob) => dotmoe::save_image_and_metadata(ob, agent),
+            Ok(ob) => dotmoe::download_and_save(ob, agent),
             Err(err) => Err(err),
         },
-        1 => match dotbest::get_image(parsed_args, agent) {
+        1 => match dotbest::get_image_id(parsed_args, agent) {
             Ok(ob) => dotbest::download_and_save(ob, agent),
             Err(err) => Err(err),
         },

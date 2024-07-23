@@ -44,7 +44,7 @@ pub fn get_image_id(
 }
 
 
-pub fn save_image_and_metadata(
+pub fn download_and_save(
     request: network::Request,
     agent: &network::Net
 ) -> Result<(), Box<dyn std::error::Error>> {
