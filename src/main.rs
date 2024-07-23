@@ -13,7 +13,6 @@ struct Args {
 struct Request {
     image_id: String,
     file_name: String,
-    response: String,
 
     open_image_on_save: bool,
 }
@@ -144,13 +143,6 @@ fn save_image_and_metadata(
         opener::open(std::path::Path::new(&request.file_name))?;
     }
 
-    if let Err(e) = fs::write(format!("{}_metadata.txt", &request.image_id), &request.response) {
-        eprintln!("Failed to write metadata: {e:?}");
-        return Err(Box::new(e));
-    }
-
-    println!("Successfully written metadata.");
-
     Ok(())
 }
 
@@ -184,7 +176,6 @@ fn get_image_id<'a>(args: &'a Args, agent: &'a ureq::Agent) -> Result<Request, B
                 Request {
                     image_id: image_id.to_string(),
                     file_name,
-                    response: body,
                     open_image_on_save
                 }
             )

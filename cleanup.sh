@@ -4,4 +4,3 @@
 # in other words, this code just gets rid of the catgirl files lmfao
 
 mv *.png ./old
-mv *.txt ./old
