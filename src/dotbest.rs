@@ -5,7 +5,7 @@ use crate::network;
 
 static REQUEST_URL: &str = "https://nekos.best/api/v2/neko";
 
-pub fn get_image(
+pub fn get_image_id(
     _args: &crate::Args,
     agent: &network::Net,
 ) -> Result<network::Request, Box<dyn std::error::Error>> {
