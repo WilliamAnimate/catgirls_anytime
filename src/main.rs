@@ -1,8 +1,10 @@
+mod network;
 mod dotmoe;
 mod dotbest;
 
 use std::{thread::sleep, time::Duration};
 use catgirls_rn::Args;
+use network::Net;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let parsed_args = catgirls_rn::parse_args();
@@ -14,6 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let agent = ureq::builder()
         .user_agent(catgirls_rn::USER_AGENT)
         .build();
+    let agent = Net::from_agent(&agent);
 
     if parsed_args.scrape {
         loop {
@@ -31,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn pick_and_download(parsed_args: &Args, agent: &ureq::Agent) -> Result<(), Box<dyn std::error::Error>> {
+fn pick_and_download(parsed_args: &Args, agent: &Net) -> Result<(), Box<dyn std::error::Error>> {
     use rand::prelude::*;
 
     // i swear this isnt that stupid lmao
