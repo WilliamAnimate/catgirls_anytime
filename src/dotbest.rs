@@ -15,14 +15,12 @@ pub fn get_image_id(
 
     match parsed_response["results"][0]["url"].as_str() {
         Some(image_id) => {
-            // shadowing go brr
             let file_name = image_id.trim_start_matches("https://nekos.best/api/v2/neko/");
-            let file_name = format!("{file_name}.png");
 
             return Ok(
                 network::Request {
                     url: image_id.to_string(),
-                    file_name,
+                    file_name: file_name.to_string(),
                     open_on_save: true,
                 }
             )
