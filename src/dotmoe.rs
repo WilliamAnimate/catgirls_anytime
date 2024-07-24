@@ -39,7 +39,7 @@ pub fn get_image_id(
                 }
             )
         },
-        None => panic!("The id value is not a string!"),
+        None => panic!("Incompatable API changes or malformed response"),
     }
 }
 
