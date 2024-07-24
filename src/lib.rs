@@ -3,7 +3,6 @@ pub struct Args {
     pub scrape: bool,
     pub allow_nsfw: bool,
     pub force_nsfw: bool,
-    pub exit_after_args: bool,
 }
 
 pub static USER_AGENT: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
@@ -16,7 +15,6 @@ pub fn parse_args() -> Args {
         scrape: false,
         allow_nsfw: false,
         force_nsfw: false,
-        exit_after_args: false,
     };
 
     for args in &args[1..] {
@@ -28,14 +26,15 @@ pub fn parse_args() -> Args {
                 parsed_args.open_image_on_save = false;
             },
             "--help" => {
+                println!("Run this program without arguments to download one image");
                 println!("--scrape        will likely junk up your 2 TB ssd. This will ignore the --save-only flag.");
                 println!("--save-only     does not open the image with the system's default image viewer");
                 println!("--allow-nsfw    allows the api to return an nsfw image");
                 println!("--force-nsfw    requests the api to return an nsfw image");
+                println!("--api-info      shows information what is supported by each api");
                 println!("--help          displays help and exists");
 
-                parsed_args.exit_after_args = true;
-                break;
+                std::process::exit(0);
             }
             "--allow-nsfw" => {
                 if parsed_args.force_nsfw {
@@ -50,6 +49,13 @@ pub fn parse_args() -> Args {
                     std::process::exit(1);
                 }
                 parsed_args.force_nsfw = true;
+            }
+            "--api-info" => {
+                println!("Supported API information\n\
+                nekos.moe       Supports nsfw control. Smaller db\n\
+                nekos.best      Does not support nsfw control. Proprietary but larger db\n\
+                pleasegivememoretosupportibegyou meow");
+                std::process::exit(0);
             }
             other => println!("Unknown argument: {other}"),
         }

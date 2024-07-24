@@ -9,10 +9,6 @@ use network::Net;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let parsed_args = catgirls_rn::parse_args();
 
-    if parsed_args.exit_after_args {
-        return Ok(())
-    }
-
     let agent = ureq::builder()
         .user_agent(catgirls_rn::USER_AGENT)
         .build();
