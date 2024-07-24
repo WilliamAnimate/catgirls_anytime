@@ -5,6 +5,7 @@ pub struct Args {
     pub force_nsfw: bool,
 }
 
+pub static INVALID_JSON_PANIC_MESSAGE: &str = "Incompatable API changes or malformed response";
 pub static USER_AGENT: &str = concat!("catgirls_rn (https://github.com/WilliamAnimate/catgirls_anytime, ", env!("CARGO_PKG_VERSION"), ")");
 
 pub fn parse_args() -> Args {
