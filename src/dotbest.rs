@@ -25,7 +25,7 @@ pub fn get_image_id(
                 }
             )
         },
-        None => panic!("Incompatable API changes or malformed response"),
+        None => panic!("{}", catgirls_rn::INVALID_JSON_PANIC_MESSAGE),
     }
 }
 
