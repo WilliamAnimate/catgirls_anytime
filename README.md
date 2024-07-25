@@ -4,7 +4,7 @@
 
 A CLI app dedicated to downloading images of catgirls. What more do you need?
 
-Based off the [nekos.moe](https://nekos.moe) [API](https://docs.nekos.moe).
+Based off [nekos.moe](https://nekos.moe)'s [API](https://docs.nekos.moe).
 
 ## Roadmap
 
@@ -22,5 +22,4 @@ The image seen above is a transparent version of [https://nekos.moe/post/Gu8dj-_
 
 ## Legal
 
-do whatever. this is licensed under the **DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE**
-
+Do whatever. This is licensed under the <a href="http://www.wtfpl.net/" target="_blank"><b>DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE</b></a>.
