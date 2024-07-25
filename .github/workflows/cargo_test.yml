@@ -1,0 +1,23 @@
+name: catgirls_anytime
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust :3
+      uses: actions-rs/toolchain@v1
+      with:
+            profile: minimal
+            toolchain: nightly
+            override: true
+
+    - name: nya~ # I need to retire - @XandrCopyrighted
+      run: cargo test --verbose
