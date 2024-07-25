@@ -21,5 +21,5 @@ jobs:
 
     - name: owo
       run: cargo build
-    - name: nya~ # I need to retire - @XandrCopyrighted
+    - name: nya~
       run: cargo test --verbose
