@@ -68,3 +68,12 @@ pub fn parse_args() -> Args {
 
     parsed_args
 }
+
+pub fn open_on_save(args: &Args) -> bool {
+    if args.scrape {
+        false
+    } else {
+        args.open_image_on_save
+    }
+}
+
