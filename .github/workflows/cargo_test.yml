@@ -19,5 +19,7 @@ jobs:
             toolchain: nightly
             override: true
 
+    - name: owo
+      run: cargo build
     - name: nya~ # I need to retire - @XandrCopyrighted
       run: cargo test --verbose
