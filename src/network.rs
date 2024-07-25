@@ -5,17 +5,18 @@ use ureq::Error;
 pub struct Request {
     pub url: String,
     pub file_name: String,
-    pub open_on_save: bool,
 }
 
 pub struct Net {
-    pub agent: ureq::Agent
+    pub agent: ureq::Agent,
+    pub open_on_save: bool,
 }
 
 impl Net {
-    pub fn from_agent(agent: ureq::Agent) -> Net {
+    pub fn new(agent: ureq::Agent, args: &crate::Args) -> Net {
         Net {
-            agent
+            agent,
+            open_on_save: args.open_image_on_save,
         }
     }
 
@@ -63,7 +64,7 @@ impl Net {
             return Err(Box::new(e));
         }
 
-        if request.open_on_save {
+        if self.open_on_save {
             println!("Opening in default image viewer.");
             opener::open(std::path::Path::new(&request.file_name))?;
         }

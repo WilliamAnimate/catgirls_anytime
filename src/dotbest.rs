@@ -6,7 +6,7 @@ use crate::network;
 static REQUEST_URL: &str = "https://nekos.best/api/v2/neko";
 
 pub fn get_image_id(
-    args: &crate::Args,
+    _args: &crate::Args,
     agent: &network::Net,
 ) -> Result<network::Request, Box<dyn std::error::Error>> {
     let body = agent.api_get_image_url(REQUEST_URL)?;
@@ -21,7 +21,6 @@ pub fn get_image_id(
                 network::Request {
                     url: image_id.to_string(),
                     file_name: file_name.to_string(),
-                    open_on_save: catgirls_rn::open_on_save(args),
                 }
             )
         },

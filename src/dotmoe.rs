@@ -29,13 +29,11 @@ pub fn get_image_id(
         Some(image_id) => {
             let url = format!("{}{}", IMAGE_URL, image_id);
             let file_name = format!("{image_id}.png");
-            let open_on_save = catgirls_rn::open_on_save(args);
 
             Ok(
                 network::Request {
                     url,
                     file_name,
-                    open_on_save
                 }
             )
         },

@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let agent = ureq::builder()
         .user_agent(catgirls_rn::USER_AGENT)
         .build();
-    let agent = Net::from_agent(agent);
+    let agent = Net::new(agent, &parsed_args);
 
     if parsed_args.scrape {
         loop {
@@ -58,16 +58,16 @@ mod tests {
     use super::*;
 
     fn __t_setup() -> (Args, Net) {
-        let agent = ureq::builder()
-            .user_agent(catgirls_rn::USER_AGENT)
-            .build();
-        let agent = Net::from_agent(agent);
         let args = Args {
             open_image_on_save: false,  // manually change to true if you wanna do this
             scrape: false,              // ditto (but bad idea)
             allow_nsfw: false,          // ditto
             force_nsfw: false,          // ditto
         };
+        let agent = ureq::builder()
+            .user_agent(catgirls_rn::USER_AGENT)
+            .build();
+        let agent = Net::new(agent, &args);
         (args, agent)
     }
 
