@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let agent = ureq::builder()
         .user_agent(catgirls_rn::USER_AGENT)
         .build();
-    let agent = Net::from_agent(&agent);
+    let agent = Net::from_agent(agent);
 
     if parsed_args.scrape {
         loop {
@@ -35,7 +35,12 @@ fn pick_and_download(parsed_args: &Args, agent: &Net) -> Result<(), Box<dyn std:
 
     // i swear this isnt that stupid lmao
     let mut rng = thread_rng();
-    match rng.gen_range(0..2) {
+    let index = rng.gen_range(0..2);
+    __download(parsed_args, agent, index)
+}
+
+fn __download(parsed_args: &Args, agent: &Net, index: i8) -> Result<(), Box<dyn std::error::Error>> {
+    match index {
         0 => match dotmoe::get_image_id(parsed_args, agent) {
             Ok(ob) => dotmoe::download_and_save(ob, agent),
             Err(err) => Err(err),
@@ -45,6 +50,46 @@ fn pick_and_download(parsed_args: &Args, agent: &Net) -> Result<(), Box<dyn std:
             Err(err) => Err(err),
         },
         _ => unreachable!("picked # not 0 or 1"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn __t_setup() -> (Args, Net) {
+        let agent = ureq::builder()
+            .user_agent(catgirls_rn::USER_AGENT)
+            .build();
+        let agent = Net::from_agent(agent);
+        let args = Args {
+            open_image_on_save: false,  // manually change to true if you wanna do this
+            scrape: false,              // ditto (but bad idea)
+            allow_nsfw: false,          // ditto
+            force_nsfw: false,          // ditto
+        };
+        (args, agent)
+    }
+
+    #[test]
+    fn nekos_moe_download() {
+        let (args, agent) = __t_setup();
+        let r = __download(&args, &agent, 0).is_ok();
+        assert!(r, "download failed");
+    }
+
+    #[test]
+    fn nekos_best_download() {
+        let (args, agent) = __t_setup();
+        let r = __download(&args, &agent, 1).is_ok();
+        assert!(r, "download failed")
+    }
+
+    #[should_panic]
+    #[test]
+    fn malformed_download_param() {
+        let (args, agent) = __t_setup();
+        __download(&args, &agent, 127).expect("we are literally expecting this value of Err");
     }
 }
 
