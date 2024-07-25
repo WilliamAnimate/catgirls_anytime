@@ -8,12 +8,12 @@ pub struct Request {
     pub open_on_save: bool,
 }
 
-pub struct Net<'a> {
-    pub agent: &'a ureq::Agent
+pub struct Net {
+    pub agent: ureq::Agent
 }
 
-impl Net<'_> {
-    pub fn from_agent(agent: &ureq::Agent) -> Net {
+impl Net {
+    pub fn from_agent(agent: ureq::Agent) -> Net {
         Net {
             agent
         }
