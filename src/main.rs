@@ -60,9 +60,8 @@ mod tests {
     fn __t_setup() -> (Args, Net) {
         let args = Args {
             open_image_on_save: false,  // manually change to true if you wanna do this
-            scrape: false,              // ditto (but bad idea)
-            allow_nsfw: false,          // ditto
-            force_nsfw: false,          // ditto
+            scrape: false, // ditto (but bad idea)
+            nsfw: catgirls_rn::NsfwCtrl::Forbid // ditto
         };
         let agent = ureq::builder()
             .user_agent(catgirls_rn::USER_AGENT)
