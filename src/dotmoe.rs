@@ -11,14 +11,13 @@ pub fn get_image_id(
     args: &crate::Args,
     agent: &network::Net
 ) -> Result<network::Request, Box<dyn std::error::Error>> {
-    // this is awful
+    use catgirls_rn::NsfwCtrl;
+
     let processed: String;
-    if args.force_nsfw {
-        processed = format!("{}{}{}", REQUEST_URL, REQUEST_PARAM_NSFW, "true");
-    } else if args.allow_nsfw {
-        processed = REQUEST_URL.to_string();
-    } else {
-        processed = format!("{}{}{}", REQUEST_URL, REQUEST_PARAM_NSFW, "false");
+    match args.nsfw {
+        NsfwCtrl::Forbid => processed = format!("{}{}{}", REQUEST_URL, REQUEST_PARAM_NSFW, "false"),
+        NsfwCtrl::Allow => processed = REQUEST_URL.to_string(),
+        NsfwCtrl::Force => processed = format!("{}{}{}", REQUEST_URL, REQUEST_PARAM_NSFW, "true"),
     }
 
     let body = agent.api_get_image_url(&processed)?;

@@ -1,8 +1,14 @@
+#[derive(PartialEq)]
+pub enum NsfwCtrl {
+    Forbid,
+    Allow,
+    Force,
+}
+
 pub struct Args {
     pub open_image_on_save: bool,
     pub scrape: bool,
-    pub allow_nsfw: bool,
-    pub force_nsfw: bool,
+    pub nsfw: NsfwCtrl,
 }
 
 pub static INVALID_JSON_PANIC_MESSAGE: &str = "Incompatable API changes or malformed response";
@@ -14,8 +20,7 @@ pub fn parse_args() -> Args {
     let mut parsed_args = Args {
         open_image_on_save: true,
         scrape: false,
-        allow_nsfw: false,
-        force_nsfw: false,
+        nsfw: NsfwCtrl::Allow,
     };
 
     for args in &args[1..] {
@@ -38,18 +43,18 @@ pub fn parse_args() -> Args {
                 std::process::exit(0);
             }
             "--allow-nsfw" => {
-                if parsed_args.force_nsfw {
+                if parsed_args.nsfw == NsfwCtrl::Force {
                     println!("Error: --force-nsfw flag passed alongside --allow-nsfw.");
                     std::process::exit(1);
                 }
-                parsed_args.allow_nsfw = true;
+                parsed_args.nsfw = NsfwCtrl::Allow;
             }
             "--force-nsfw" => {
-                if parsed_args.allow_nsfw {
+                if parsed_args.nsfw == NsfwCtrl::Allow {
                     println!("Error: --allow-nsfw flag passed alongside --force-nsfw.");
                     std::process::exit(1);
                 }
-                parsed_args.force_nsfw = true;
+                parsed_args.nsfw = NsfwCtrl::Force;
             }
             "--api-info" => {
                 println!("Supported API information\n\
@@ -62,7 +67,7 @@ pub fn parse_args() -> Args {
         }
     }
 
-    if parsed_args.allow_nsfw || parsed_args.force_nsfw {
+    if parsed_args.nsfw != NsfwCtrl::Forbid {
         println!("Caution: nsfw is on!");
     }
 
