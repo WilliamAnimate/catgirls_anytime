@@ -20,7 +20,7 @@ pub fn parse_args() -> Args {
     let mut parsed_args = Args {
         open_image_on_save: true,
         scrape: false,
-        nsfw: NsfwCtrl::Allow,
+        nsfw: NsfwCtrl::Forbid,
     };
 
     for args in &args[1..] {
