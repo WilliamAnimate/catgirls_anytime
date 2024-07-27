@@ -75,32 +75,30 @@ mod tests {
         (args, agent)
     }
 
+    fn download_test(index: i8) -> Result<(), Box<dyn std::error::Error>>  {
+        let (args, agent) = __t_setup();
+        __download(&args, &agent, index)
+    }
+
     #[test]
     fn nekos_moe_download() {
-        let (args, agent) = __t_setup();
-        let r = __download(&args, &agent, 0).is_ok();
-        assert!(r, "download failed");
+        assert!(download_test(0).is_ok(), "download failed");
     }
 
     #[test]
     fn nekos_best_download() {
-        let (args, agent) = __t_setup();
-        let r = __download(&args, &agent, 1).is_ok();
-        assert!(r, "download failed")
+        assert!(download_test(1).is_ok(), "download failed")
     }
 
     #[test]
     fn nekos_life_download() {
-        let (args, agent) = __t_setup();
-        let r = __download(&args, &agent, 2).is_ok();
-        assert!(r, "download failed")
+        assert!(download_test(2).is_ok(), "download failed")
     }
 
     #[should_panic]
     #[test]
     fn malformed_download_param() {
-        let (args, agent) = __t_setup();
-        __download(&args, &agent, 127).expect("we are literally expecting this value of Err");
+        let _ = download_test(127);
     }
 }
 
