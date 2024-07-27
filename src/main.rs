@@ -40,7 +40,7 @@ fn pick_and_download(parsed_args: &Args, agent: &Net) -> Result<(), Box<dyn std:
     __download(parsed_args, agent, index)
 }
 
-fn __download(parsed_args: &Args, agent: &Net, index: i8) -> Result<(), Box<dyn std::error::Error>> {
+fn __download(parsed_args: &Args, agent: &Net, index: u8) -> Result<(), Box<dyn std::error::Error>> {
     match index {
         0 => match dotmoe::get_image_id(parsed_args, agent) {
             Ok(ob) => dotmoe::download_and_save(ob, agent),
@@ -75,7 +75,7 @@ mod tests {
         (args, agent)
     }
 
-    fn download_test(index: i8) -> Result<(), Box<dyn std::error::Error>>  {
+    fn download_test(index: u8) -> Result<(), Box<dyn std::error::Error>>  {
         let (args, agent) = __t_setup();
         __download(&args, &agent, index)
     }
