@@ -89,6 +89,13 @@ mod tests {
         assert!(r, "download failed")
     }
 
+    #[test]
+    fn nekos_life_download() {
+        let (args, agent) = __t_setup();
+        let r = __download(&args, &agent, 2).is_ok();
+        assert!(r, "download failed")
+    }
+
     #[should_panic]
     #[test]
     fn malformed_download_param() {
