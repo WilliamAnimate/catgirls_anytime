@@ -1,6 +1,7 @@
 mod network;
 mod dotmoe;
 mod dotbest;
+mod dotlife;
 
 use std::{thread::sleep, time::Duration};
 use catgirls_rn::Args;
@@ -49,7 +50,11 @@ fn __download(parsed_args: &Args, agent: &Net, index: i8) -> Result<(), Box<dyn 
             Ok(ob) => dotbest::download_and_save(ob, agent),
             Err(err) => Err(err),
         },
-        _ => unreachable!("picked # not 0 or 1"),
+        2 => match dotlife::get_image_id(parsed_args, agent) {
+            Ok(ob) => dotlife::download_and_save(ob, agent),
+            Err(err) => Err(err),
+        },
+        _ => unreachable!("picked # not 0 or 2"),
     }
 }
 
