@@ -3,7 +3,7 @@
 use serde_json::Value;
 use crate::network;
 
-static API: &str = "https://nekos.life/api/v2/img/waifu"; // this site sucks
+static API: &str = "https://nekos.life/api/v2/img/neko"; // this site sucks
 
 pub fn get_image_id(
     _args: &crate::Args,
@@ -15,7 +15,7 @@ pub fn get_image_id(
 
     match parsed_response["url"].as_str() {
         Some(image_id) => {
-            let file_name = image_id.trim_start_matches("https://cdn.nekos.life/meow/");
+            let file_name = image_id.trim_start_matches("https://cdn.nekos.life/neko/");
 
             return Ok(
                 network::Request {
