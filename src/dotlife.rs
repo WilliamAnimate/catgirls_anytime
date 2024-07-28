@@ -13,19 +13,7 @@ pub fn get_image_id(
 
     let parsed_response: Value = serde_json::from_str(&body).unwrap();
 
-    match parsed_response["url"].as_str() {
-        Some(image_id) => {
-            let file_name = image_id.trim_start_matches("https://cdn.nekos.life/neko/");
-
-            return Ok(
-                network::Request {
-                    url: image_id.to_string(),
-                    file_name: file_name.to_string(),
-                }
-            )
-        },
-        None => panic!("{}", catgirls_rn::INVALID_JSON_PANIC_MESSAGE),
-    }
+    network::Request::new(&parsed_response["url"], "https://cdn.nekos.life/neko/")
 }
 
 pub fn download_and_save(

@@ -24,6 +24,7 @@ pub fn get_image_id(
 
     let parsed_response: Value = serde_json::from_str(&body).unwrap();
 
+    // N.B. nekos.moe is special and we need to parse to get the file name
     match parsed_response["images"][0]["id"].as_str() {
         Some(image_id) => {
             let url = format!("{}{}", IMAGE_URL, image_id);

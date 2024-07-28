@@ -7,6 +7,24 @@ pub struct Request {
     pub file_name: String,
 }
 
+impl Request {
+    pub fn new(opt: &serde_json::Value, trim: &str) -> Result<Request, Box<dyn std::error::Error>> {
+        match opt.as_str() {
+            Some(image_id) => {
+                let file_name = image_id.trim_start_matches(trim);
+
+                return Ok(
+                    Request {
+                        url: image_id.to_string(),
+                        file_name: file_name.to_string(),
+                    }
+                )
+            }
+            None => panic!("{}", catgirls_rn::INVALID_JSON_PANIC_MESSAGE),
+        }
+    }
+}
+
 pub struct Net {
     pub agent: ureq::Agent,
     pub open_on_save: bool,
