@@ -19,7 +19,9 @@ jobs:
             toolchain: nightly
             override: true
 
+    - name: https://youtu.be/2kacWA5adQw # you asked for this
+      run: cargo install cargo-mommy
     - name: owo
-      run: cargo build
+      run: cargo-mommy build
     - name: nya~
-      run: cargo test --verbose
+      run: cargo-mommy test --verbose
