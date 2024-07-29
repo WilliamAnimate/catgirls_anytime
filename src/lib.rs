@@ -60,7 +60,7 @@ pub fn parse_args() -> Args {
                 println!("Supported API information\n\
                 nekos.moe       Supports nsfw control. Smaller db\n\
                 nekos.best      Does not support nsfw control. Proprietary but larger db\n\
-                pleasegivememoretosupportibegyou meow");
+                nekos.life      Does not support nsfw control.");
                 std::process::exit(0);
             }
             other => println!("Unknown argument: {other}"),
