@@ -27,14 +27,14 @@ impl Request {
 
 pub struct Net {
     pub agent: ureq::Agent,
-    pub open_on_save: bool,
+    pub args: catgirls_rn::Args
 }
 
 impl Net {
     pub fn new(agent: ureq::Agent, args: &crate::Args) -> Net {
         Net {
             agent,
-            open_on_save: args.open_image_on_save,
+            args: *args
         }
     }
 
@@ -82,7 +82,7 @@ impl Net {
             return Err(Box::new(e));
         }
 
-        if self.open_on_save {
+        if self.args.open_image_on_save {
             println!("Opening in default image viewer.");
             opener::open(std::path::Path::new(&request.file_name))?;
         }

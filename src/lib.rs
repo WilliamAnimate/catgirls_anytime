@@ -1,10 +1,11 @@
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum NsfwCtrl {
     Forbid,
     Allow,
     Force,
 }
 
+#[derive(Clone, Copy)]
 pub struct Args {
     pub open_image_on_save: bool,
     pub scrape: bool,
