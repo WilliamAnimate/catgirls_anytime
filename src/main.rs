@@ -100,6 +100,11 @@ mod tests {
         assert!(download_test(2).is_ok(), "download failed")
     }
 
+    #[test]
+    fn nekosapidotcom_download() {
+        assert!(download_test(3).is_ok(), "download failed")
+    }
+
     #[should_panic]
     #[test]
     fn malformed_download_param() {
