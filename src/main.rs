@@ -2,6 +2,7 @@ mod network;
 mod dotmoe;
 mod dotbest;
 mod dotlife;
+mod nekosapidotcom;
 
 use std::{thread::sleep, time::Duration};
 use catgirls_rn::Args;
@@ -36,7 +37,7 @@ fn pick_and_download(parsed_args: &Args, agent: &Net) -> Result<(), Box<dyn std:
 
     // i swear this isnt that stupid lmao
     let mut rng = thread_rng();
-    let index = rng.gen_range(0..2);
+    let index = rng.gen_range(0..4);
     __download(parsed_args, agent, index)
 }
 
@@ -54,7 +55,11 @@ fn __download(parsed_args: &Args, agent: &Net, index: u8) -> Result<(), Box<dyn 
             Ok(ob) => dotlife::download_and_save(ob, agent),
             Err(err) => Err(err),
         },
-        _ => unreachable!("picked # not 0 or 2"),
+        3 => match nekosapidotcom::get_image_id(parsed_args, agent) {
+            Ok(ob) => nekosapidotcom::download_and_save(ob, agent),
+            Err(err) => Err(err),
+        },
+        _ => unreachable!("picked # not in valid range"),
     }
 }
 
