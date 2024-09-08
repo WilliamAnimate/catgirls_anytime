@@ -4,7 +4,6 @@ mod dotbest;
 mod dotlife;
 mod nekosapidotcom;
 
-use std::{thread::sleep, time::Duration};
 use catgirls_rn::Args;
 use network::Net;
 
@@ -21,7 +20,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Err(err) = pick_and_download(&parsed_args, &agent) {
                 eprintln!("Failed: {err}");
             }
-            sleep(Duration::from_secs(20));
         }
     }
 
