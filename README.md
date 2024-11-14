@@ -30,5 +30,9 @@ The image seen above is a transparent version of [https://nekos.moe/post/Gu8dj-_
 
 ## Legal
 
-Do whatever. This is licensed under the **[DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE](http://wtfpl.net)**
+Do whatever. This is licensed under the **[DO WHAT THE FUCK YOU WANT TO BUT ITS NOT ON ME PUBLIC LICENSE](./LICENSE)**
+
+The DO WHAT THE FUCK YOU WANT TO BUT ITS NOT ON ME PUBLIC LICENSE is a modified version of the [DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE](http://wtfpl.net).
+
+All prior and current, and possibly future versions of the license shall be licensed under the `LICENSE` file in the root directory of this repository.
 
