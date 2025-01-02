@@ -12,6 +12,9 @@ Currently supports the following APIs:
 
 - [nekos.life](https://nekos.life)
 
+> [!CAUTION]
+> nekos.best forbids scraping, and you will be **IP BANNED**. Do not use the `--scrape` option for extended amounts of time. **there is no failsafe.**
+
 ## Roadmap
 
 - [x] opening images in user's default image viewer.
